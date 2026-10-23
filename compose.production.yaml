@@ -1,0 +1,10 @@
+# Complemento: docker compose -f compose.yaml -f compose.production.yaml up -d --build
+services:
+  web:
+    environment:
+      APP_ENV: production
+      JWT_ISSUER: ${JWT_ISSUER:?Configura JWT_ISSUER}
+      JWT_PUBLIC_KEY_FILE: /run/secrets/platform-public.pem
+      PLATFORM_ORIGIN: ${PLATFORM_ORIGIN:?Configura PLATFORM_ORIGIN}
+    volumes:
+      - ./secrets/platform-public.pem:/run/secrets/platform-public.pem:ro

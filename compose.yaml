@@ -1,0 +1,38 @@
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: rastro_rural
+      MYSQL_USER: rastro
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en .env}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/001_schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+      - ./database/002_login_unico.sql:/docker-entrypoint-initdb.d/002_login_unico.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [database]
+  web:
+    build: .
+    restart: unless-stopped
+    environment:
+      APP_ENV: development
+      DB_URL: jdbc:mysql://db:3306/rastro_rural?sslMode=DISABLED&allowPublicKeyRetrieval=true&connectionTimeZone=-05:00&forceConnectionTimeZoneToSession=true
+      DB_USER: rastro
+      DB_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en .env}
+    ports: ["127.0.0.1:8080:8080"]
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [database, web]
+volumes:
+  mysql_data:
+networks:
+  database:
+    internal: true
+  web:
