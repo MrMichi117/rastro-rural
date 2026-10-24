@@ -6,3 +6,10 @@ backups
 *.pem
 *.key
 .tools
+.local
+
+**/target
+**/.env*
+**/backups
+**/*.pem
+**/*.key

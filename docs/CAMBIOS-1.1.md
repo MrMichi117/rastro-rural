@@ -1,3 +1,5 @@
+> Documento histórico de la versión 1.1. La versión 1.2 usa Flutter y elimina las tablas de cuentas; ver README e IDENTIDAD.md. No ejecutar las instrucciones antiguas en el esquema actual.
+
 # Actualización 1.1
 
 ## Acceso único y tabla login

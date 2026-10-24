@@ -1,83 +1,73 @@
 # Rastro Rural
 
-Aplicación web comunitaria para reportar animales extraviados y compartir avistamientos en Travesías, Florencia, Caquetá. Implementada con **Java 17, Jakarta Servlet 6, Tomcat 10.1, MySQL y HTML/CSS/JavaScript con Bootstrap 5.3.8**.
+Aplicación comunitaria para reportar animales perdidos y compartir avistamientos en Travesías, Florencia, Caquetá. Frontend **Flutter 3.47.5 / Dart**, backend **Java 17 / Jakarta Servlet / Tomcat 10.1**, base de datos **MySQL 8**. Versión 1.2.0.
 
-Se revisaron los sprints 0 y 1, la guía de estilos, los mockups y el módulo de encuesta de esta carpeta. Por instrucción del equipo, esta implementación cambia Express/Flutter por Java/Bootstrap y funciona **exclusivamente en línea**. Los documentos originales permanecen intactos.
+## Organización
 
-## Empezar en Windows con Docker
-
-1. Abre Docker Desktop y espera a que el motor esté disponible.
-2. Abre PowerShell dentro de esta carpeta `rastro-rural`.
-3. Ejecuta:
-
-```powershell
-Copy-Item .env.example .env
-notepad .env
-# Reemplaza las dos contraseñas por valores largos, aleatorios y distintos.
-docker compose up -d --build
-docker compose logs -f web
+```text
+frontend/        Flutter Material 3: pantallas, tema, cliente API, recursos y pruebas
+backend/         Java: API, identidad, JDBC, validación y pruebas HTTP
+database/        Esquema actual de cinco tablas y ejemplos históricos en legacy/
+tools/auth-local/ Simulador local del login central de la plantilla suministrada
+scripts/         Preparación local, compilación y arranque
+docs/            Base de datos, desarrollo, identidad, pruebas y futuro Dokploy
+Dockerfile       Compila Flutter y Java y produce una imagen Tomcat
+docker-compose.yml Futuro servicio Dokploy con MySQL externo ya existente
+compose.yaml     Entorno alternativo local con su propio MySQL
 ```
 
-Abre [Rastro Rural local](http://localhost:8080/rastro-rural/). En **Acceso comunitario** puedes seleccionar **Vecino 1** o **Vecino 2**, exclusivamente en este entorno de desarrollo. Publica con uno y registra un avistamiento con el otro. No se incluyen animales ficticios en la base inicial; el tablero empieza vacío.
+La aplicación funciona exclusivamente en línea. No guarda reportes ni tokens en localStorage, sessionStorage, IndexedDB o colas offline. No registra Service Workers. Flutter, las fuentes y CanvasKit se sirven desde Tomcat; el backend entrega `Cache-Control: no-store`.
+
+## Pruebas locales en este equipo
+
+La base utilizada es **rastro_rural_local**, en **127.0.0.1:3310**. Es independiente de la base de Dokploy y de las bases anteriores. Los valores privados están en `.local/settings.json`, excluido de Git y de Docker.
+
+En PowerShell, desde esta carpeta:
 
 ```powershell
-docker compose ps
-docker compose stop
-docker compose start
+# Configura JAVA_HOME para un JDK 17 o superior antes de compilar.
+./scripts/start-mysql-local.ps1
+# Solo si hay que iniciar MySQL después de reiniciar Windows.
+./scripts/build.ps1
+./scripts/run-local.ps1
 ```
 
-El volumen `mysql_data` conserva los datos. El SQL inicial solo se ejecuta cuando el volumen está vacío. No uses `docker compose down -v` para actualizar la aplicación: elimina la base.
-
-## Las cuatro fases
-
-1. **Base de datos:** [script MySQL](database/001_schema.sql) y [modelo de datos](docs/01-base-de-datos.md).
-2. **Backend y frontend:** [arquitectura y ejecución](docs/02-desarrollo.md), [contrato HTTP](docs/API.md) e [integración de identidad](docs/IDENTIDAD.md).
-3. **GitHub:** [comandos exactos, ramas, commits y publicación](docs/03-github.md).
-4. **Despliegue:** [guía de producción y recuperación](docs/04-despliegue.md).
-
-También se incluye [trazabilidad con los sprints y plan de pruebas](docs/PRUEBAS.md).
-
-## Funciones implementadas
-
-- Tablero público ordenado por creación, filtros por especie/sector y búsqueda por nombre, señas, identificación o descripción; paginación de 12 reportes.
-- Reporte de pérdida con especie «Otro», identificación, señas, sector, fecha, descripción y fotografía JPEG/PNG opcional.
-- Detalle público, avistamientos con fecha y hora de Bogotá, y lista cronológica de observaciones.
-- Mis reportes, edición, eliminación de fotografía y cierre como ENCONTRADO o CANCELADO, solo por el autor.
-- Encuesta de cinco preguntas con escala 1–5, una respuesta por identidad y versión.
-- Tabla local `login` vinculada al usuario del servidor central; carga automática de nombre/usuario verificados, sin otro registro ni copia de contraseñas.
-- Inicio con bienvenida y cuatro acciones explicadas; instrucciones visibles en cada módulo y acceso directo para contar dónde se vio al animal.
-- Validación en servidor, consultas parametrizadas, transacciones, control de edición concurrente y validación de identidad JWT RS256 en producción.
-- Diseño adaptable con texto de 18 px, botones de al menos 60 px en celular, opciones de encuesta de 64 px y confirmaciones amplias; logos y fuentes incluidos en el WAR.
-
-## Compilar sin Docker
-
-Instala un JDK 17 o superior y configura `JAVA_HOME`. El wrapper descarga Maven en su primera ejecución.
+En otra terminal, con Python 3:
 
 ```powershell
-.\mvnw.cmd clean verify
-# Resultado: target/rastro-rural.war
+./scripts/start-auth-local.ps1
 ```
 
-Para ejecutar con MySQL local consulta [desarrollo](docs/02-desarrollo.md). El WAR debe desplegarse en **Tomcat 10.1**; no en Tomcat 9 (`javax.servlet`).
+Abre **http://127.0.0.1:8110/** para probar el login de las cuentas de la plantilla y entrar a Rastro Rural. Las cuentas se configuran en `test_accounts` del archivo privado. También puedes abrir **http://localhost:8080/rastro-rural/**: en desarrollo se conserva el acceso automático de Vecino 1 para probar los formularios. No hay botón ni modal de “Acceso comunitario”.
 
-## Identidad central y límites conocidos
+Para preparar otro MySQL local vacío, ejecuta `python scripts/setup-local.py --port 3310`. Requiere un servidor MySQL ya iniciado y el cliente mysql; usa `MYSQL_PWD` del administrador si tiene contraseña. No descarga ni arranca MySQL. Nunca apunta al servidor remoto. El script evita modificar una base local con esquema incompatible.
 
-El usuario inicia sesión una sola vez en el servidor central y entra a Rastro Rural (Grupo 2) con ese acceso. `login` guarda su perfil local de acceso: identificador central, emisor, nombre de usuario, nombre visible y fechas de acceso. Se crea o actualiza automáticamente después de validar la identidad. No guarda contraseñas, hashes de contraseña ni tokens. `usuario_referencia` conserva los vínculos de los reportes existentes.
+## Funciones
 
-El contrato real del servidor central todavía no está disponible. Se entrega un **adaptador verificable RS256**, con emisor, audiencia y clave pública configurables; el equipo central debe aprobar o adaptar este contrato antes de producción. Los campos `preferred_username` y `name` del token firmado cargan el perfil y el saludo. Si faltan, se muestra un saludo genérico.
+- Inicio con instrucciones sencillas y ayuda por pantalla.
+- Tablero con búsqueda, especie, sector y paginación.
+- Crear/editar reporte, fotografía JPEG/PNG, cancelar o marcar encontrado.
+- Registrar avistamientos con sector, fecha y hora de Bogotá.
+- Encuesta de cinco preguntas y una respuesta por identidad y versión.
+- Autoría a partir de la identidad validada del servidor: cada registro guarda referencia, emisor y nombre; la base del servicio no contiene tablas de usuarios ni login.
 
-**Actualizar una instalación existente:** respalda la base, aplica solamente [002_login_unico.sql](database/002_login_unico.sql) y despliega el WAR actualizado. No vuelvas a ejecutar el esquema inicial ni borres el volumen. La migración conserva reportes, avistamientos y encuestas; los perfiles se completan cuando cada persona entra con su sesión validada. La instalación desde cero ya incluye la tabla en `001_schema.sql`.
+## Compilar y comprobar
 
-No hay `localStorage`, `sessionStorage`, IndexedDB, Service Workers ni colas/reintentos automáticos. Las respuestas llevan `Cache-Control: no-store`. El token existe únicamente en memoria de la pestaña; al recargar se solicita nuevamente a la plataforma. Un formulario no enviado puede permanecer en la memoria de la página, pero no sobrevive al cierre. Ante una respuesta perdida, consulta el tablero antes de reenviar: esta versión no garantiza idempotencia entre envíos manuales distintos.
+`scripts/build.ps1` ejecuta análisis, pruebas Flutter, build web y verificación Maven. Resultado: **backend/target/rastro-rural.war**. Para comprobar solo Java: `./mvnw.cmd test`. Para las pruebas web: `cd frontend; flutter test`. El WAR completo necesita primero `flutter build web --release --base-href /rastro-rural/ --no-web-resources-cdn`.
 
-La búsqueda de coincidencias es textual, por especie y sector; no utiliza reconocimiento de fotos, mapas, GPS ni rastreo en vivo. Se registra el avistamiento desde un reporte existente, conforme al MVP de los sprints. No se crea un flujo independiente de animales encontrados sin reporte de pérdida.
+## Docker y Dokploy
 
-Los sectores proceden de los mockups y deben validarse con la comunidad. La encuesta se adaptó a Java conservando preguntas y contrato; no se conecta al backend FastAPI existente. Falta acordar si su almacenamiento será centralizado. Las metas de 2,5 s bajo 3G y 95 % de disponibilidad requieren medición en el servidor real.
+El proyecto está preparado para una futura aplicación de tipo Compose conectada al repositorio **MrMichi117/rastro-rural**, rama `main`, ruta `docker-compose.yml`. Esta configuración utiliza la base MySQL existente; no crea otra base ni otro servicio de identidad en el servidor. **No se ha desplegado en Dokploy.** Antes del despliegue deben acordarse la identidad de producción, la red compartida, las variables privadas y la ruta pública.
 
-## Referencias técnicas
+Para la alternativa local Docker: `Copy-Item .env.example .env`, completar contraseñas y usar siempre `docker compose -f compose.yaml up -d --build`. MySQL local Docker se publica en 127.0.0.1:3309; no confundir con MySQL nativo de este equipo en 3310.
 
-- [Tomcat 10.1 y Jakarta Servlet 6](https://tomcat.apache.org/tomcat-10.1-doc/)
-- [MySQL Connector/J](https://dev.mysql.com/doc/connector-j/en/)
-- [Bootstrap 5.3](https://getbootstrap.com/docs/5.3/getting-started/download/)
+## Documentación
 
-No se ha publicado un repositorio remoto ni desplegado un servidor público. Las guías incluyen los pasos para hacerlo con tus cuentas y dominio.
+- [Base de datos](docs/01-base-de-datos.md)
+- [Desarrollo y diseño Flutter](docs/02-desarrollo.md)
+- [GitHub](docs/03-github.md)
+- [Futuro Dokploy](docs/04-despliegue.md)
+- [Identidad y plantilla de tokens](docs/IDENTIDAD.md)
+- [Workbench local](docs/WORKBENCH-LOCAL.md)
+- [API](docs/API.md)
+- [Verificación](docs/PRUEBAS.md)

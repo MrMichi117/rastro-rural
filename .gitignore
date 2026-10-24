@@ -18,4 +18,10 @@ backups/
 .tools/
 __pycache__/
 .DS_Store
+.local/
 Thumbs.db
+
+.dart_tool/
+build/
+.flutter-plugins-dependencies
+*.xml.bak

@@ -6,7 +6,7 @@ Base: `/rastro-rural/api`. JSON UTF-8. Métodos de escritura con `Content-Type: 
 |---|---|---|---|
 | GET | /health | Público | Comprueba conexión de base; no expone configuración. |
 | GET | /config | Público | Modo de desarrollo y origen de plataforma. |
-| GET | /me | Identidad | Perfil propio de login, cargado desde la identidad validada. |
+| GET | /me | Identidad | Perfil del token validado en esta petición, sin tabla local de cuentas. |
 | GET | /catalogos | Público | Especies y sectores. |
 | GET | /estadisticas | Público | Totales de búsquedas, encontrados y avistamientos. |
 | GET | /reportes | Público | Activos, más recientes primero. |
@@ -82,6 +82,7 @@ Formato `{ "error": "Mensaje comprensible" }`. Códigos: 400 JSON inválido, 401
 
 No hay reenvíos automáticos. Si la respuesta se pierde después del COMMIT, el recurso puede existir: el usuario debe consultar el tablero antes de publicar nuevamente.
 
-## Perfil propio de login único
 
-`GET /me` verifica el acceso central y crea/actualiza el perfil local. Devuelve `authenticated: true` y `usuario` con `usuario_id`, `nombre_usuario`, `nombre_visible`, `primer_acceso` y `ultimo_acceso`. Los nombres pueden ser null si el servidor no los entrega; la interfaz muestra un saludo genérico. Los datos vienen exclusivamente del token firmado, nunca de parámetros ni formularios. No se devuelve contraseña ni token. El perfil no se incluye en el tablero público.
+## Identidad
+
+GET /me devuelve `{authenticated: true, usuario: {usuario_id, nombre_usuario, nombre_visible}}` del token validado. No se aceptan esos valores en formularios para determinar autoría. La referencia y emisor del autor se conservan en cada registro y no se publican en el tablero. Ver IDENTIDAD.md para el adaptador local HS256 y el contrato propuesto RS256 de producción.

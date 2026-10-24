@@ -1,0 +1,30 @@
+name: rastro_rural
+description: Rastro Rural, red comunitaria Travesías. Aplicación web online.
+publish_to: none
+version: 1.2.0+2
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  http: ^1.3.0
+  web: ^1.1.1
+  file_selector: ^1.0.3
+  cupertino_icons: ^2.0.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/logos/
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/montserrat.ttf
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/roboto.ttf

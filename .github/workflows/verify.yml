@@ -15,11 +15,19 @@ jobs:
           --health-interval=10s --health-timeout=5s --health-retries=20
     steps:
       - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.5'
+          channel: stable
+          cache: true
+      - run: flutter pub get && flutter analyze && flutter test && flutter build web --release --base-href /rastro-rural/ --no-web-resources-cdn
+        working-directory: frontend
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
           cache: maven
+          cache-dependency-path: backend/pom.xml
       - run: mvn -B clean verify
         env:
           TEST_DB_URL: jdbc:mysql://localhost:3306/rastro_test?allowPublicKeyRetrieval=true&sslMode=DISABLED&connectionTimeZone=-05:00&forceConnectionTimeZoneToSession=true
@@ -28,4 +36,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: rastro-rural-war
-          path: target/rastro-rural.war
+          path: backend/target/rastro-rural.war

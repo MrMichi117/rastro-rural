@@ -1,0 +1,25 @@
+# FUTURO Dokploy: archivo preparado, no desplegado. Usa el MySQL existente.
+# Configure las variables y el contrato de identidad antes de desplegar.
+services:
+  rastro-rural:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      DB_URL: ${DB_URL:?Configura la URL JDBC del MySQL existente}
+      DB_USER: ${DB_USER:?Configura el usuario MySQL del servicio}
+      DB_PASSWORD: ${DB_PASSWORD:?Configura la contraseña MySQL}
+      JWT_ISSUER: ${JWT_ISSUER:?Pendiente contrato de identidad de producción}
+      JWT_PUBLIC_KEY_FILE: /run/secrets/platform-public.pem
+      PLATFORM_ORIGIN: ${PLATFORM_ORIGIN:?Configura el origen del portal}
+      CENTRAL_LOGIN_URL: ${CENTRAL_LOGIN_URL:-}
+      CENTRAL_DASHBOARD_URL: ${CENTRAL_DASHBOARD_URL:-}
+    expose: ["8080"]
+    volumes:
+      - ${JWT_PUBLIC_KEY_PATH:?Ruta de clave pública en el servidor}:/run/secrets/platform-public.pem:ro
+    networks: [dokploy-network]
+networks:
+  dokploy-network:
+    external: true

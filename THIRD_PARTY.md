@@ -1,8 +1,9 @@
-# Recursos de terceros
+# Recursos y dependencias de terceros
 
-- Bootstrap 5.3.8, MIT: licencia incluida en `src/main/webapp/assets/vendor/bootstrap-LICENSE.txt`.
-- Montserrat y Roboto, SIL Open Font License: licencias junto a los TTF en `assets/fonts/`. Archivos variables obtenidos del repositorio oficial `google/fonts`.
-- Logos institucionales: copiados de los archivos suministrados por el equipo en el módulo de encuesta. Se preservan sus proporciones; su uso y distribución están sujetos a las autorizaciones institucionales del proyecto.
-- Dependencias Java: declaradas con versiones en `pom.xml`. Conservan sus respectivas licencias; consulta los metadatos de cada dependencia antes de distribuir el producto fuera del contexto del proyecto.
+- Flutter/Dart, Material Icons: licencias de sus SDK; dependencias fijadas en frontend/pubspec.lock.
+- Montserrat y Roboto: licencias OFL junto a sus fuentes en frontend/assets/fonts/.
+- Logos institucionales: extraídos del material de diseño suministrado para el proyecto académico; se conserva la proporción.
+- Backend: dependencias y versiones en backend/pom.xml.
+- La redacción de las cinco preguntas y la escala 1–5 conserva el módulo de encuesta proporcionado por el equipo. No se presenta como la escala estandarizada SUS.
 
-No se reutilizaron fotos de animales de los mockups ni se incorporaron reportes ficticios en el esquema inicial.
+El ZIP original de tokens y sus credenciales de ejemplo no se distribuyen con la aplicación. El simulador local implementa únicamente su contrato de pruebas.

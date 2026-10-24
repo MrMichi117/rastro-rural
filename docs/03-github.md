@@ -16,7 +16,7 @@ git diff --cached --check
 git commit -m 'feat: implementar Rastro Rural online con Java y MySQL'
 ```
 
-La configuración de nombre y correo queda limitada a este repositorio. `.gitignore` excluye `.env`, WAR, compilados, secretos PEM/KEY, logs, IDE y respaldos; conserva `.env.example`, código y wrapper Maven. Antes del commit revisa el diff y comprueba que no hay contraseñas reales. No incluyas `target/` ni la carpeta superior `.tools/`.
+La configuración de nombre y correo queda limitada a este repositorio. `.gitignore` excluye `.env`, WAR, compilados, secretos PEM/KEY, logs, IDE y respaldos; conserva `.env.example`, código y wrapper Maven. Antes del commit revisa el diff y comprueba que no hay contraseñas reales. No incluyas `backend/target/` ni la carpeta superior `.tools/`.
 
 ## Publicar
 
