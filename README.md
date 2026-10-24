@@ -1,6 +1,6 @@
 # Rastro Rural
 
-Aplicación comunitaria para reportar animales perdidos y compartir avistamientos en Travesías, Florencia, Caquetá. Frontend **Flutter 3.47.5 / Dart**, backend **Java 17 / Jakarta Servlet / Tomcat 10.1**, base de datos **MySQL 8**. Versión 1.2.0.
+Aplicación comunitaria para reportar animales perdidos y compartir avistamientos en Travesías, Florencia, Caquetá. Frontend **Flutter 3.47.5 / Dart**, backend **Java 17 / Jakarta Servlet / Tomcat 10.1**, base de datos **MySQL 8**. Versión 1.3.0.
 
 ## Organización
 
@@ -45,9 +45,10 @@ Para preparar otro MySQL local vacío, ejecuta `python scripts/setup-local.py --
 ## Funciones
 
 - Inicio con instrucciones sencillas y ayuda por pantalla.
-- Tablero con búsqueda, especie, sector y paginación.
+- Menú hamburguesa fijo en teléfono y navegación completa en escritorio.
+- Tablero con filtros verdes por especie, búsqueda por texto de sector y paginación.
 - Crear/editar reporte, fotografía JPEG/PNG, cancelar o marcar encontrado.
-- Registrar avistamientos con sector, fecha y hora de Bogotá.
+- Registrar avistamientos describiendo libremente el sector, fecha y hora de Bogotá.
 - Encuesta de cinco preguntas y una respuesta por identidad y versión.
 - Autoría a partir de la identidad validada del servidor: cada registro guarda referencia, emisor y nombre; la base del servicio no contiene tablas de usuarios ni login.
 

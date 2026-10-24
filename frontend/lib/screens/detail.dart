@@ -274,11 +274,12 @@ class SightingForm extends StatefulWidget {
 class _SightingFormState extends State<SightingForm> {
   final form = GlobalKey<FormState>();
   final note = TextEditingController(), when = TextEditingController();
-  int? sector;
+  final sector = TextEditingController();
   DateTime? selected;
   bool busy = false;
   @override
   void dispose() {
+    sector.dispose();
     note.dispose();
     when.dispose();
     super.dispose();
@@ -315,13 +316,14 @@ class _SightingFormState extends State<SightingForm> {
         'reportes/${widget.report['id']}/avistamientos',
         method: 'POST',
         body: {
-          'sector_id': sector,
+          'sector': sector.text.trim(),
           'fecha_avistamiento': selected!.toIso8601String(),
           'observacion': note.text.trim(),
         },
       );
       if (mounted) {
         notice(context, 'Avistamiento registrado. Gracias por ayudar.');
+        sector.clear();
         note.clear();
         when.clear();
         selected = null;
@@ -340,18 +342,18 @@ class _SightingFormState extends State<SightingForm> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        DropdownButtonFormField<int>(
-          isExpanded: true,
-          decoration: const InputDecoration(labelText: 'Sector *'),
-          items: [
-            for (final s in widget.api.catalogs['sectores'])
-              DropdownMenuItem(
-                value: s['id'] as int,
-                child: Text(s['nombre'].toString()),
-              ),
-          ],
-          onChanged: busy ? null : (v) => sector = v,
-          validator: (v) => v == null ? 'Selecciona un sector.' : null,
+        TextFormField(
+          controller: sector,
+          enabled: !busy,
+          maxLength: 250,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            labelText: 'Describe el sector donde lo viste *',
+            hintText: 'Ejemplo: por el camino a la escuela, junto al puente.',
+          ),
+          validator: (v) => v == null || v.trim().isEmpty
+              ? 'Describe el lugar donde viste al animal.'
+              : null,
         ),
         const SizedBox(height: 20),
         TextFormField(

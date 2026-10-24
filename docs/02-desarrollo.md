@@ -30,3 +30,5 @@ No se utiliza Google Fonts por red, Bootstrap ni un WebView para envolver HTML. 
 El segundo comando carga `.local/settings.json` y ejecuta Tomcat de desarrollo. Requiere el build Flutter existente y MySQL iniciado. Para iterar con recarga en Flutter puede usarse un proxy local que sirva `/api` hacia Tomcat o configurar CORS explícito; la forma verificada es compilar y servir el WAR/preview desde el mismo origen.
 
 Los formularios anuncian el resultado del servidor y conservan lo escrito en memoria ante un error para permitir su revisión. No se reintenta automáticamente un POST incierto. Las fechas del negocio se interpretan en Bogotá; el backend limita fechas y valida fotos JPEG/PNG de hasta 2 MB y 16 MP y las recodifica sin EXIF.
+
+En teléfono (ancho menor que 800 px), AppBar fija y Drawer con cuatro módulos de altura 76. En escritorio se conserva la barra de navegación. Los ChoiceChip usan verde explícito para evitar los colores por defecto de Material. La política connect-src admite blob: para que file_selector pueda leer el archivo elegido, manteniendo la validación de imagen y tamaño en el servidor.

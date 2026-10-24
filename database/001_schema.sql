@@ -6,7 +6,7 @@ CREATE TABLE especie (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE sector (
  id INT PRIMARY KEY AUTO_INCREMENT,
- nombre VARCHAR(100) NOT NULL UNIQUE,
+ nombre VARCHAR(250) NOT NULL UNIQUE,
  descripcion VARCHAR(250)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE reporte (
@@ -65,7 +65,4 @@ CREATE TABLE encuesta (
  UNIQUE KEY uq_encuesta(usuario_id,usuario_emisor,subproyecto_id,version_encuesta)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 INSERT INTO especie(nombre) VALUES ('Bovino'),('Canino'),('Equino'),('Felino'),('Porcino'),('Ovino'),('Caprino'),('Ave'),('Otro');
--- Sectores de referencia tomados del mockup: validar catálogo con la comunidad.
-INSERT INTO sector(nombre,descripcion) VALUES
- ('La Vega','Referencia del prototipo'),('El Mirador','Referencia del prototipo'),
- ('Quebrada Seca','Referencia del prototipo'),('Centro Comunal','Referencia del prototipo');
+-- Los sectores se describen al crear reportes o avistamientos; no hay lista predefinida.

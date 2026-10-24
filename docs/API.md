@@ -19,7 +19,7 @@ Base: `/rastro-rural/api`. JSON UTF-8. Métodos de escritura con `Content-Type: 
 | POST | /reportes/{id}/avistamientos | Identidad | Añade observación, 201 con id. |
 | POST | /v1/encuestas/usabilidad | Identidad | Guarda una encuesta, 201. |
 
-Filtros de listado: `q` (máximo 100 caracteres), `especie` y `sector` (ID), `page` (desde 1). Respuesta: `{items, total, page, page_size:12}`. No se listan autores ni contactos públicos. Las cifras de estadísticas son totales históricos, no recuperados del mes.
+Filtros de listado: `q` (máximo 100 caracteres), `especie` (ID), `sector` (texto parcial de hasta 250 caracteres), `page` (desde 1). Respuesta: `{items, total, page, page_size:12}`. No se listan autores ni contactos públicos. Las cifras de estadísticas son totales históricos, no recuperados del mes.
 
 ## Crear o editar reporte
 
@@ -31,7 +31,7 @@ Filtros de listado: `q` (máximo 100 caracteres), `especie` y `sector` (ID), `pa
   "identificador_campo": "Arete 23",
   "senas": "Pelaje café y mancha blanca en la frente",
   "descripcion": "Se perdió cerca del camino principal",
-  "sector_id": 1,
+  "sector": "Vereda La Esperanza, cerca del puente",
   "fecha_perdida": "2026-10-20"
 }
 ```
@@ -50,7 +50,7 @@ También acepta CANCELADO. Responde 403 para otro autor y 409 si está cerrado o
 
 ```json
 {
-  "sector_id": 2,
+  "sector": "Camino a la escuela, junto a la quebrada",
   "fecha_avistamiento": "2026-10-21T14:30",
   "observacion": "Lo vi junto al puente, caminando hacia el sector alto."
 }

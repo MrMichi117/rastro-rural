@@ -1,11 +1,11 @@
-# Base de datos 1.2
+# Base de datos 1.3
 
 El esquema vigente está en `database/001_schema.sql`. Se ejecuta una sola vez sobre una base vacía seleccionada previamente. No contiene credenciales ni sentencias de borrado.
 
 | Tabla | Contenido |
 |---|---|
 | especie | Catálogo de tipos de animal |
-| sector | Sectores comunitarios, pendientes de validación con la comunidad |
+| sector | Descripciones libres escritas por la comunidad, de hasta 250 caracteres |
 | reporte | Pérdida, señas, estado, foto y referencia del autor autenticado |
 | avistamiento | Pista, fecha/hora, sector y referencia de quien la registró |
 | encuesta | Cinco respuestas, versión e identidad para evitar duplicados |
@@ -23,3 +23,7 @@ Las relaciones internas son `reporte.especie_id`, `reporte.sector_id`, `avistami
 - Futuro servidor: MySQL de Dokploy existente, esquema `rastro_rural`. No se conectó ni modificó durante estas pruebas.
 
 `database/legacy` conserva los scripts 1.0/1.1 como historial. **No aplicarlos a una instalación nueva.** Tampoco ejecutar 001 sobre una base anterior con tablas/datos existentes. Las bases anteriores de este equipo se conservaron: las pruebas nuevas usan un esquema separado. Una migración de datos históricos requiere respaldo y revisión de los identificadores del antiguo login antes de cambiar tablas; no hay migración destructiva automática.
+
+## Actualización 1.3
+
+Aplicar database/003_sectores_libres.sql sobre una instalación 1.2 existente después de respaldar. Solo amplía sector.nombre a 250 caracteres y conserva todas las filas y referencias. Las instalaciones nuevas no tienen sectores predeterminados; cada formulario envía sector como texto y el backend resuelve su referencia en una transacción. El filtro del tablero busca por texto parcial, no por un catálogo.

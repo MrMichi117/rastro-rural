@@ -13,7 +13,8 @@ class Board extends StatefulWidget {
 
 class _BoardState extends State<Board> {
   final search = TextEditingController();
-  int species = 0, sector = 0, page = 1;
+  int species = 0, page = 1;
+  final sector = TextEditingController();
   late Future<Data> future;
   @override
   void initState() {
@@ -24,6 +25,7 @@ class _BoardState extends State<Board> {
   @override
   void dispose() {
     search.dispose();
+    sector.dispose();
     super.dispose();
   }
 
@@ -32,7 +34,7 @@ class _BoardState extends State<Board> {
       'page': '$page',
       if (widget.mine) 'mine': 'true',
       if (species > 0) 'especie': '$species',
-      if (sector > 0) 'sector': '$sector',
+      if (sector.text.trim().isNotEmpty) 'sector': sector.text.trim(),
       if (search.text.isNotEmpty) 'q': search.text,
     };
     future = widget.mine && !widget.api.authenticated
@@ -90,25 +92,14 @@ class _BoardState extends State<Board> {
                 onSubmitted: (_) => refresh(first: true),
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<int>(
-                initialValue: sector,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Sector'),
-                items: [
-                  const DropdownMenuItem(
-                    value: 0,
-                    child: Text('Todos los sectores'),
-                  ),
-                  for (final s in widget.api.catalogs['sectores'])
-                    DropdownMenuItem(
-                      value: s['id'] as int,
-                      child: Text(s['nombre'].toString()),
-                    ),
-                ],
-                onChanged: (value) {
-                  sector = value ?? 0;
-                  refresh(first: true);
-                },
+              TextField(
+                controller: sector,
+                maxLength: 250,
+                decoration: const InputDecoration(
+                  labelText: 'Buscar por sector',
+                  hintText: 'Escribe parte del lugar o la vereda',
+                ),
+                onSubmitted: (_) => refresh(first: true),
               ),
               const SizedBox(height: 16),
               OutlinedButton.icon(
@@ -126,6 +117,14 @@ class _BoardState extends State<Board> {
                     ...widget.api.catalogs['especies'],
                   ])
                     ChoiceChip(
+                      selectedColor: green,
+                      backgroundColor: const Color(0xFFEAF3EB),
+                      checkmarkColor: Colors.white,
+                      side: const BorderSide(color: green),
+                      labelStyle: TextStyle(
+                        color: species == s['id'] ? Colors.white : green,
+                        fontWeight: FontWeight.w600,
+                      ),
                       label: Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 14,

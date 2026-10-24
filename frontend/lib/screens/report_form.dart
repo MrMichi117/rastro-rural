@@ -21,11 +21,12 @@ class _ReportFormState extends State<ReportForm> {
       'especie_otro',
       'senas',
       'descripcion',
+      'sector',
     ])
       key: TextEditingController(),
   };
   final date = TextEditingController();
-  int? species, sector;
+  int? species;
   Data original = {};
   String? photo, photoName;
   bool removePhoto = false, busy = false;
@@ -45,7 +46,6 @@ class _ReportFormState extends State<ReportForm> {
               entry.value.text = label(r, entry.key);
             }
             species = r['especie_id'];
-            sector = r['sector_id'];
             date.text = label(r, 'fecha_perdida');
             return r;
           });
@@ -113,7 +113,6 @@ class _ReportFormState extends State<ReportForm> {
       final body = <String, dynamic>{
         for (final entry in fields.entries) entry.key: entry.value.text.trim(),
         'especie_id': species,
-        'sector_id': sector,
         'fecha_perdida': date.text,
         if (widget.id != null) 'version': original['version'],
         if (photo != null) 'foto': photo,
@@ -241,11 +240,14 @@ class _ReportFormState extends State<ReportForm> {
                       lines: 3,
                       hint: 'Color, tamaño, manchas, collar…',
                     ),
-                    catalog(
-                      'sectores',
-                      'Último sector conocido',
-                      sector,
-                      (v) => setState(() => sector = v),
+                    input(
+                      'sector',
+                      'Describe el último sector conocido',
+                      250,
+                      required: true,
+                      lines: 3,
+                      hint:
+                          'Ejemplo: vereda La Esperanza, cerca del puente y la escuela.',
                     ),
                     TextFormField(
                       controller: date,

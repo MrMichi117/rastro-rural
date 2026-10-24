@@ -37,7 +37,7 @@ public final class ApiServlet extends HttpServlet {
                     Json.send(res,200,Map.of("buscando",query(c,"SELECT COUNT(*) total FROM reporte WHERE estado='BUSCANDO'").get(0).get("total"),"encontrados",query(c,"SELECT COUNT(*) total FROM reporte WHERE estado='ENCONTRADO'").get(0).get("total"),"avistamientos",query(c,"SELECT COUNT(*) total FROM avistamiento").get(0).get("total")));
                 }return;
             }
-            if(path.equals("/reportes")) {Json.send(res,200,service.list(user,"true".equals(req.getParameter("mine")),req.getParameter("q"),number(req.getParameter("especie"),0),number(req.getParameter("sector"),0),number(req.getParameter("page"),1)));return;}
+            if(path.equals("/reportes")) {Json.send(res,200,service.list(user,"true".equals(req.getParameter("mine")),req.getParameter("q"),number(req.getParameter("especie"),0),req.getParameter("sector"),number(req.getParameter("page"),1)));return;}
             if(path.matches("/reportes/\\d+")) {Json.send(res,200,service.detail(Long.parseLong(path.split("/")[2]),user));return;}
             if(path.matches("/reportes/\\d+/foto")) {
                 try(Connection c=Database.connection();PreparedStatement st=c.prepareStatement("SELECT foto,foto_tipo FROM reporte WHERE id=?")) {

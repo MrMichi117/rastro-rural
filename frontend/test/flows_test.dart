@@ -7,6 +7,7 @@ import 'package:rastro_rural/api.dart';
 import 'package:rastro_rural/main.dart';
 import 'package:rastro_rural/screens/report_form.dart';
 import 'package:rastro_rural/screens/survey.dart';
+import 'package:rastro_rural/screens/board.dart';
 import 'package:rastro_rural/theme.dart';
 
 void main() {
@@ -49,10 +50,68 @@ void main() {
       expect(find.text('Reportar un animal perdido'), findsOneWidget);
       expect(find.text('Revisar mis reportes'), findsOneWidget);
       expect(find.text('Dar mi opinión'), findsOneWidget);
+      expect(
+        find.byIcon(Icons.menu),
+        width < 800 ? findsOneWidget : findsNothing,
+      );
+      if (width < 800) {
+        await tester.tap(find.byIcon(Icons.menu));
+        await tester.pumpAndSettle();
+        expect(find.text('¿A dónde quieres ir?'), findsOneWidget);
+        for (final title in [
+          'Inicio y ayuda',
+          'Animales perdidos',
+          'Mis reportes',
+          'Tu opinión',
+        ]) {
+          expect(find.widgetWithText(ListTile, title), findsOneWidget);
+        }
+      }
       expect(tester.takeException(), isNull);
       api.dispose();
     });
   }
+  testWidgets('Species filters are green and sector filter is free text', (
+    tester,
+  ) async {
+    final api =
+        RastroApi(
+            base: Uri.parse('http://localhost/api/'),
+            client: MockClient(
+              (request) async => http.Response(
+                jsonEncode(
+                  request.url.path.endsWith('estadisticas')
+                      ? {'buscando': 0, 'encontrados': 0, 'avistamientos': 0}
+                      : {'items': [], 'total': 0},
+                ),
+                200,
+              ),
+            ),
+          )
+          ..catalogs = {
+            'especies': [
+              {'id': 1, 'nombre': 'Bovino'},
+            ],
+            'sectores': [],
+          };
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: rastroTheme(),
+        home: RastroShell(
+          api: api,
+          child: Board(api: api),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(DropdownButtonFormField<int>), findsNothing);
+    final chip = tester.widget<ChoiceChip>(
+      find.widgetWithText(ChoiceChip, 'Todas'),
+    );
+    expect(chip.selectedColor, green);
+    expect(find.widgetWithText(TextField, 'Buscar por sector'), findsOneWidget);
+    api.dispose();
+  });
   testWidgets(
     'An incomplete report is validated before it reaches the server',
     (tester) async {

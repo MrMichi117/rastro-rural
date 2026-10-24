@@ -98,107 +98,210 @@ class RastroShell extends StatelessWidget {
   const RastroShell({super.key, required this.api, required this.child});
   final RastroApi api;
   final Widget child;
+  static const destinations = [
+    ('Inicio y ayuda', '/inicio', Icons.home_outlined),
+    ('Animales perdidos', '/tablero', Icons.pets),
+    ('Mis reportes', '/mis-reportes', Icons.assignment_outlined),
+    ('Tu opinión', '/encuesta', Icons.favorite_border),
+  ];
+  Widget brand() => Row(
+    children: [
+      Image.asset(
+        'assets/logos/red_comunitaria.png',
+        width: 42,
+        height: 48,
+        fit: BoxFit.contain,
+      ),
+      const SizedBox(width: 10),
+      const Expanded(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Rastro Rural',
+              style: TextStyle(
+                fontFamily: 'Montserrat',
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text('RED COMUNITARIA TRAVESÍAS', style: TextStyle(fontSize: 10)),
+          ],
+        ),
+      ),
+    ],
+  );
   @override
   Widget build(BuildContext context) => Scaffold(
+    appBar: MediaQuery.sizeOf(context).width < 800
+        ? AppBar(
+            backgroundColor: green,
+            foregroundColor: Colors.white,
+            toolbarHeight: 76,
+            leadingWidth: 64,
+            leading: Builder(
+              builder: (context) => IconButton(
+                tooltip: 'Abrir menú',
+                icon: const Icon(Icons.menu, size: 30),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
+            ),
+            title: brand(),
+          )
+        : null,
+    drawer: MediaQuery.sizeOf(context).width < 800
+        ? Drawer(
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    color: green,
+                    padding: const EdgeInsets.all(24),
+                    child: DefaultTextStyle(
+                      style: const TextStyle(color: Colors.white),
+                      child: brand(),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text(
+                      '¿A dónde quieres ir?',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  for (final item in destinations)
+                    ListTile(
+                      minTileHeight: 76,
+                      leading: Icon(item.$3, color: green),
+                      title: Text(item.$1),
+                      selected:
+                          ModalRoute.of(context)?.settings.name == item.$2,
+                      selectedColor: green,
+                      selectedTileColor: const Color(0xFFEAF3EB),
+                      onTap: () {
+                        Navigator.pop(context);
+                        go(context, item.$2);
+                      },
+                    ),
+                  const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                      label: const Text('Cerrar menú'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        : null,
     body: SafeArea(
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ColoredBox(
-              color: green,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1220),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/logos/red_comunitaria.png',
-                              width: 50,
-                              height: 50,
-                              fit: BoxFit.contain,
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Rastro Rural',
-                                    style: TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      color: Colors.white,
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  Text(
-                                    'RED COMUNITARIA TRAVESÍAS',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
+            if (MediaQuery.sizeOf(context).width >= 800)
+              ColoredBox(
+                color: green,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1220),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Image.asset(
+                                'assets/logos/red_comunitaria.png',
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.contain,
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            const routes = [
-                              '/inicio',
-                              '/tablero',
-                              '/mis-reportes',
-                              '/encuesta',
-                            ];
-                            const names = [
-                              'Inicio y ayuda',
-                              'Animales perdidos',
-                              'Mis reportes',
-                              'Tu opinión',
-                            ];
-                            final width = constraints.maxWidth < 650
-                                ? (constraints.maxWidth - 12) / 2
-                                : (constraints.maxWidth - 36) / 4;
-                            return Wrap(
-                              spacing: 12,
-                              runSpacing: 12,
-                              children: [
-                                for (var i = 0; i < routes.length; i++)
-                                  SizedBox(
-                                    width: width,
-                                    child: OutlinedButton(
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: Colors.white,
-                                        minimumSize: const Size(0, 60),
-                                        side: const BorderSide(
-                                          color: Colors.white54,
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Rastro Rural',
+                                      style: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        color: Colors.white,
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    Text(
+                                      'RED COMUNITARIA TRAVESÍAS',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              const routes = [
+                                '/inicio',
+                                '/tablero',
+                                '/mis-reportes',
+                                '/encuesta',
+                              ];
+                              const names = [
+                                'Inicio y ayuda',
+                                'Animales perdidos',
+                                'Mis reportes',
+                                'Tu opinión',
+                              ];
+                              final width = constraints.maxWidth < 650
+                                  ? (constraints.maxWidth - 12) / 2
+                                  : (constraints.maxWidth - 36) / 4;
+                              return Wrap(
+                                spacing: 12,
+                                runSpacing: 12,
+                                children: [
+                                  for (var i = 0; i < routes.length; i++)
+                                    SizedBox(
+                                      width: width,
+                                      child: OutlinedButton(
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: Colors.white,
+                                          minimumSize: const Size(0, 60),
+                                          side: const BorderSide(
+                                            color: Colors.white54,
+                                          ),
+                                        ),
+                                        onPressed: () => go(context, routes[i]),
+                                        child: Text(
+                                          names[i],
+                                          textAlign: TextAlign.center,
                                         ),
                                       ),
-                                      onPressed: () => go(context, routes[i]),
-                                      child: Text(
-                                        names[i],
-                                        textAlign: TextAlign.center,
-                                      ),
                                     ),
-                                  ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
             const ColoredBox(
               color: Color(0xFFEAF1EB),
               child: Padding(

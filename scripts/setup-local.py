@@ -26,6 +26,9 @@ if count == '0':
     sql((root/'database/001_schema.sql').read_text(encoding='utf-8'), 'rastro_rural_local')
 elif sql("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='rastro_rural_local' AND table_name='reporte' AND column_name='usuario_emisor';") != '1':
     raise SystemExit('El esquema local contiene una versión anterior. Haz un respaldo antes de migrar; no se alteraron sus tablas.')
+width = sql("SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.columns WHERE table_schema='rastro_rural_local' AND table_name='sector' AND column_name='nombre';")
+if width and int(width) < 250:
+    sql((root/'database/003_sectores_libres.sql').read_text(encoding='utf-8'), 'rastro_rural_local')
 sql(f"CREATE USER IF NOT EXISTS 'rastro_local'@'localhost' IDENTIFIED BY '{password}'; ALTER USER 'rastro_local'@'localhost' IDENTIFIED BY '{password}'; GRANT SELECT,INSERT,UPDATE ON rastro_rural_local.* TO 'rastro_local'@'localhost';")
 settings.update({
     'DB_URL':f'jdbc:mysql://127.0.0.1:{args.port}/rastro_rural_local?sslMode=DISABLED&allowPublicKeyRetrieval=true&connectionTimeZone=-05:00&forceConnectionTimeZoneToSession=true',

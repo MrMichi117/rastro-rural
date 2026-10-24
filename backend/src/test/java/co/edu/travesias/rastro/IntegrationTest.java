@@ -42,7 +42,7 @@ class IntegrationTest {
     }
     @AfterAll static void stop() throws Exception {if(tomcat!=null){tomcat.stop();tomcat.destroy();}}
     static Map<String,Object> report() {
-        return new HashMap<>(Map.of("especie_id",1,"sector_id",1,"nombre_animal","Lucero","senas","Mancha blanca en la frente","descripcion","Visto por Ãºltima vez cerca del camino.","fecha_perdida",LocalDate.now(Validation.ZONE).minusDays(1).toString()));
+        return new HashMap<>(Map.of("especie_id",1,"sector","Vereda de prueba, cerca de la escuela","nombre_animal","Lucero","senas","Mancha blanca en la frente","descripcion","Visto por Ãºltima vez cerca del camino.","fecha_perdida",LocalDate.now(Validation.ZONE).minusDays(1).toString()));
     }
     static long create() throws Exception {var response=call("POST","/reportes",report(),"dev-vecino-1");assertEquals(201,response.statusCode(),response.body());return json(response).path("id").asLong();}
     @Test void trustedProfileDoesNotCreateLocalAccounts() throws Exception {
@@ -67,12 +67,13 @@ class IntegrationTest {
         var other=new Identity.Principal("vecino-1","https://other.test","otro","Otro");
         assertFalse((Boolean)new ReportService().detail(id,other).get("es_autor"));
         assertThrows(ApiException.class,()->new ReportService().change(id,other,Json.MAPPER.valueToTree(Map.of("estado","ENCONTRADO","version",0)),true));
-        assertEquals(0,((Number)new ReportService().list(other,true,null,0,0,1).get("total")).intValue());
+        assertEquals(0,((Number)new ReportService().list(other,true,null,0,null,1).get("total")).intValue());
     }
     @Test void publicBoardAndSecurityHeaders() throws Exception {
         var response=call("GET","/reportes",null,null);assertEquals(200,response.statusCode());
         assertTrue(response.headers().firstValue("Cache-Control").orElse("").contains("no-store"));
         assertTrue(response.headers().firstValue("Content-Security-Policy").isPresent());
+        assertTrue(response.headers().firstValue("Content-Security-Policy").orElse("").contains("connect-src 'self' blob:"));
         assertEquals(401,call("POST","/reportes",report(),null).statusCode());
         assertEquals(401,call("GET","/reportes?mine=true",null,null).statusCode());
         assertEquals(401,call("GET","/me",null,"false-identity").statusCode());
@@ -83,7 +84,7 @@ class IntegrationTest {
         assertFalse(json(call("GET","/reportes/"+id,null,"dev-vecino-2")).path("es_autor").asBoolean());
         assertFalse(json(call("GET","/reportes/"+id,null,null)).has("usuario_id"));
         assertEquals(403,call("PATCH","/reportes/"+id+"/estado",Map.of("estado","ENCONTRADO","version",0),"dev-vecino-2").statusCode());
-        var sighting=Map.of("sector_id",2,"fecha_avistamiento",LocalDateTime.now(Validation.ZONE).minusMinutes(1).toString(),"observacion","Cerca del puente.");
+        var sighting=Map.of("sector","Camino del puente","fecha_avistamiento",LocalDateTime.now(Validation.ZONE).minusMinutes(1).toString(),"observacion","Cerca del puente.");
         assertEquals(201,call("POST","/reportes/"+id+"/avistamientos",sighting,"dev-vecino-2").statusCode());
         assertEquals(1,json(call("GET","/reportes/"+id,null,null)).path("avistamientos").size());
         var edit=report();edit.put("version",0);edit.put("nombre_animal","Lucerito");
@@ -100,7 +101,7 @@ class IntegrationTest {
         body.put("especie_id",9);assertEquals(422,call("POST","/reportes",body,"dev-vecino-1").statusCode());
         body.put("especie_otro","Alpaca");assertEquals(201,call("POST","/reportes",body,"dev-vecino-1").statusCode());
         body.put("fecha_perdida",LocalDate.now(Validation.ZONE).plusDays(1).toString());assertEquals(422,call("POST","/reportes",body,"dev-vecino-1").statusCode());
-        body=report();body.put("sector_id",999);assertEquals(422,call("POST","/reportes",body,"dev-vecino-1").statusCode());
+        body=report();body.put("sector","   ");assertEquals(422,call("POST","/reportes",body,"dev-vecino-1").statusCode());
         body=report();body.put("foto","data:text/html;base64,PHNjcmlwdD4=");assertEquals(422,call("POST","/reportes",body,"dev-vecino-1").statusCode());
         assertEquals(0,json(call("GET","/reportes?q=%27%20OR%201%3D1--",null,null)).path("total").asInt());
         assertEquals(422,call("GET","/reportes?page=-1",null,null).statusCode());
@@ -124,8 +125,24 @@ class IntegrationTest {
         var body=report();body.put("foto","data:image/png;base64,"+Base64.getEncoder().encodeToString(bytes.toByteArray()));
         var saved=call("POST","/reportes",body,"dev-vecino-1");assertEquals(201,saved.statusCode(),saved.body());
         long id=json(saved).path("id").asLong();var photo=call("GET","/reportes/"+id+"/foto",null,null);
+        var detail=json(call("GET","/reportes/"+id,null,null));
+        assertTrue(detail.path("tiene_foto").isBoolean());assertTrue(detail.path("tiene_foto").asBoolean());
         assertEquals(200,photo.statusCode());assertEquals("image/png",photo.headers().firstValue("Content-Type").orElse(""));
         body.put("foto",null);body.put("version",0);assertEquals(200,call("PUT","/reportes/"+id,body,"dev-vecino-1").statusCode());
         assertEquals(404,call("GET","/reportes/"+id+"/foto",null,null).statusCode());
+    }
+    @Test void sectorsCanBeDescribedAndSearchedWithoutPredefinedOptions() throws Exception {
+        String place="Vereda sin catalogar, junto al puente de madera y la escuela; " + "camino rural ".repeat(8);
+        var body=report();body.put("sector",place);
+        var saved=call("POST","/reportes",body,"dev-vecino-1");assertEquals(201,saved.statusCode(),saved.body());
+        long id=json(saved).path("id").asLong();
+        assertEquals(place.strip(),json(call("GET","/reportes/"+id,null,null)).path("sector").asText());
+        var filtered=json(call("GET","/reportes?sector="+java.net.URLEncoder.encode("Vereda sin catalogar",java.nio.charset.StandardCharsets.UTF_8),null,null));
+        assertTrue(filtered.path("total").asInt()>0);
+        var clue=Map.of("sector","Sector nuevo cerca de la quebrada","fecha_avistamiento",LocalDateTime.now(Validation.ZONE).minusMinutes(1).toString(),"observacion","Prueba de lugar libre.");
+        assertEquals(201,call("POST","/reportes/"+id+"/avistamientos",clue,"dev-vecino-2").statusCode());
+        assertEquals("Sector nuevo cerca de la quebrada",json(call("GET","/reportes/"+id,null,null)).path("avistamientos").get(0).path("sector").asText());
+        body.put("sector","x".repeat(251));assertEquals(422,call("POST","/reportes",body,"dev-vecino-1").statusCode());
+        body.put("sector","   ");assertEquals(422,call("POST","/reportes",body,"dev-vecino-1").statusCode());
     }
 }
